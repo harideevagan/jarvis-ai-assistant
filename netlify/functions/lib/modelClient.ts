@@ -6,7 +6,7 @@
 const API_URL =
   process.env.LLM_API_URL || "https://integrate.api.nvidia.com/v1/chat/completions";
 const API_KEY = process.env.NVIDIA_API_KEY;
-const MODEL = process.env.LLM_MODEL || "meta/llama-3.1-70b-instruct";
+const MODEL = process.env.LLM_MODEL || "openai/gpt-oss-20b";
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant" | "tool";
@@ -56,7 +56,7 @@ export async function callModel(
       Authorization: `Bearer ${API_KEY}`,
     },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(25000),
+    signal: AbortSignal.timeout(9000),
   });
 
   if (!res.ok) {

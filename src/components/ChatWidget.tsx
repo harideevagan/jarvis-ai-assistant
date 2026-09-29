@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 type Role = "user" | "assistant";
-type Source = { title: string; url: string; snippet: string };
 type Message = {
   id: string;
   role: Role;
   content: string;
-  sources?: Source[];
-  usedWebSearch?: boolean;
 };
 
 const LANGUAGES = [
@@ -74,8 +71,6 @@ export default function ChatWidget() {
         id: uid(),
         role: "assistant",
         content: data.reply,
-        sources: data.sources,
-        usedWebSearch: data.usedWebSearch,
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
@@ -207,26 +202,6 @@ export default function ChatWidget() {
               }`}
             >
               <p>{msg.content}</p>
-
-              {msg.sources && msg.sources.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-black/10 dark:border-white/10 text-xs">
-                  <div className="font-semibold mb-1 opacity-70">🌐 Web research used</div>
-                  <ul className="space-y-1">
-                    {msg.sources.map((s) => (
-                      <li key={s.url}>
-                        <a
-                          href={s.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline opacity-80 hover:opacity-100"
-                        >
-                          {s.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               {msg.role === "assistant" && (
                 <div className="mt-2 flex gap-3 text-xs opacity-60">
