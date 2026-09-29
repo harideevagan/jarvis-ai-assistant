@@ -158,16 +158,14 @@ export default function ChatWidget() {
   }
 
   return (
-    <div className="glass flex flex-col h-[70vh] max-h-[720px] rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(91,124,250,0.18)] ring-1 ring-brand-500/20">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/50 dark:border-white/10">
-        <div className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          Ask Jarvis anything
-        </div>
+    <div className="flex flex-col h-[75vh] max-h-[760px] rounded-2xl border border-slate-200 bg-white overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-200">
+        <div className="text-sm font-medium text-slate-500">Ask Jarvis anything</div>
         <div className="flex items-center gap-2">
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-transparent px-2 py-1"
+            className="text-xs rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-600"
             aria-label="Response language"
           >
             {LANGUAGES.map((lng) => (
@@ -178,124 +176,142 @@ export default function ChatWidget() {
           </select>
           <button
             onClick={clearChat}
-            className="text-xs rounded-md border border-slate-300 dark:border-slate-700 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="text-xs rounded-md px-2 py-1 text-slate-600 hover:bg-slate-100"
           >
             New conversation
           </button>
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {messages.length === 0 && (
-          <div className="text-sm text-slate-500 dark:text-slate-400 text-center mt-8">
-            Ask about Harideevagan's projects, services, Odoo/AI work, or anything current — Jarvis
-            can search the web when it needs to.
+          <div className="text-sm text-slate-500 text-center mt-16 px-6">
+            Ask about Harideevagan's projects, services, Odoo/AI work, or anything else — Jarvis is
+            happy to help.
           </div>
         )}
 
         <AnimatePresence initial={false}>
-        {messages.map((msg) => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 14, x: msg.role === "user" ? 16 : -16 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm prose-chat whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-gradient-to-br from-brand-500 to-indigo-500 text-white rounded-br-sm shadow-[0_4px_18px_rgba(91,124,250,0.35)]"
-                  : "bg-white/70 dark:bg-white/10 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-bl-sm"
-              }`}
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className={msg.role === "assistant" ? "bg-slate-50" : "bg-white"}
             >
-              <p>{msg.content}</p>
+              <div className="max-w-3xl mx-auto flex gap-4 px-4 py-5">
+                <Avatar role={msg.role} />
+                <div className="flex-1 min-w-0 text-[15px] leading-relaxed text-slate-800 prose-chat whitespace-pre-wrap">
+                  <p>{msg.content}</p>
 
-              {msg.role === "assistant" && (
-                <div className="mt-2 flex gap-3 text-xs opacity-60">
-                  <button onClick={() => copyMessage(msg.content)} className="hover:opacity-100">
-                    Copy
-                  </button>
-                  <button onClick={() => toggleSpeak(msg)} className="hover:opacity-100">
-                    {speakingId === msg.id ? "⏹ Stop" : "🔊 Listen"}
-                  </button>
-                  <button onClick={() => shareMessage(msg.content)} className="hover:opacity-100">
-                    Share
-                  </button>
+                  {msg.role === "assistant" && (
+                    <div className="mt-2 flex gap-3 text-xs text-slate-400">
+                      <button onClick={() => copyMessage(msg.content)} className="hover:text-slate-700">
+                        Copy
+                      </button>
+                      <button onClick={() => toggleSpeak(msg)} className="hover:text-slate-700">
+                        {speakingId === msg.id ? "⏹ Stop" : "🔊 Listen"}
+                      </button>
+                      <button onClick={() => shareMessage(msg.content)} className="hover:text-slate-700">
+                        Share
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </motion.div>
-        ))}
+              </div>
+            </motion.div>
+          ))}
         </AnimatePresence>
 
         {loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-start"
-            role="status"
-            aria-label="Jarvis is thinking"
-          >
-            <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm bg-white/70 dark:bg-white/10 border border-white/60 dark:border-white/10 px-4 py-3 text-brand-500">
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-              <span className="typing-dot" />
+          <div className="bg-slate-50" role="status" aria-label="Jarvis is thinking">
+            <div className="max-w-3xl mx-auto flex gap-4 px-4 py-5">
+              <Avatar role="assistant" />
+              <div className="flex items-center gap-1.5 text-slate-400">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+              </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {error && (
-          <div className="text-xs text-red-500 bg-red-50 dark:bg-red-950/40 rounded-lg px-3 py-2">
-            {error}
+          <div className="max-w-3xl mx-auto px-4 py-3">
+            <div className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</div>
           </div>
         )}
       </div>
 
-      <div className="border-t border-white/50 dark:border-white/10 p-3">
-        {messages.some((m) => m.role === "assistant") && !loading && (
-          <button
-            onClick={regenerate}
-            className="mb-2 text-xs rounded-md border border-slate-300 dark:border-slate-700 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800"
+      <div className="px-4 pb-4 pt-2">
+        <div className="max-w-3xl mx-auto">
+          {messages.some((m) => m.role === "assistant") && !loading && (
+            <button
+              onClick={regenerate}
+              className="mb-2 text-xs rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
+            >
+              ↻ Regenerate
+            </button>
+          )}
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-end gap-1 rounded-3xl border border-slate-300 bg-white pl-4 pr-2 py-2 shadow-sm focus-within:border-slate-400"
           >
-            ↻ Regenerate
-          </button>
-        )}
-        <form onSubmit={handleSubmit} className="flex items-end gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage(input);
-              }
-            }}
-            rows={1}
-            placeholder="Ask Jarvis anything..."
-            className="flex-1 resize-none rounded-3xl border border-slate-300/80 dark:border-white/10 bg-white/60 dark:bg-white/5 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:shadow-[0_0_18px_rgba(91,124,250,0.35)] transition-shadow"
-          />
-          <button
-            type="button"
-            onClick={toggleListen}
-            aria-label="Voice input"
-            className={`rounded-full border px-3 py-2.5 text-sm transition-colors ${
-              listening
-                ? "mic-listening"
-                : "border-slate-300/80 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/10"
-            }`}
-          >
-            🎤
-          </button>
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            className="btn-primary !rounded-full !px-5 disabled:opacity-50 disabled:hover:shadow-none"
-          >
-            Ask
-          </button>
-        </form>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(input);
+                }
+              }}
+              rows={1}
+              placeholder="Message Jarvis"
+              className="flex-1 resize-none bg-transparent py-1.5 text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none max-h-40"
+            />
+            <button
+              type="button"
+              onClick={toggleListen}
+              aria-label="Voice input"
+              className={`h-9 w-9 shrink-0 inline-flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition-colors ${
+                listening ? "mic-listening" : ""
+              }`}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="9" y="3" width="6" height="12" rx="3" />
+                <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+              </svg>
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              aria-label="Send message"
+              className="h-9 w-9 shrink-0 inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+            </button>
+          </form>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function Avatar({ role }: { role: Role }) {
+  return role === "assistant" ? (
+    <div className="h-8 w-8 shrink-0 rounded-full bg-slate-900 text-white text-sm font-semibold font-display inline-flex items-center justify-center">
+      J
+    </div>
+  ) : (
+    <div className="h-8 w-8 shrink-0 rounded-full bg-slate-200 text-slate-600 inline-flex items-center justify-center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21a8 8 0 0 1 16 0z" />
+      </svg>
     </div>
   );
 }

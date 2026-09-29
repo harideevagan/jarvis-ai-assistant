@@ -6,9 +6,9 @@ export default function About() {
     <div className="max-w-3xl mx-auto px-4 py-16">
       <Reveal>
         <h1 className="page-title">
-          About <span className="gradient-text">{profile.name}</span>
+          About {profile.name}
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">{profile.summary}</p>
+        <p className="text-lg text-slate-600 leading-relaxed">{profile.summary}</p>
       </Reveal>
 
       <Reveal>
@@ -35,7 +35,7 @@ export default function About() {
 
       <Reveal>
         <h2 className="section-title">Awards</h2>
-        <ul className="card-lift p-5 list-disc list-inside text-slate-600 dark:text-slate-300 space-y-1">
+        <ul className="card-lift p-5 list-disc list-inside text-slate-600 space-y-1">
           {profile.awards.map((a) => (
             <li key={a.name}>
               {a.name} ({a.period})

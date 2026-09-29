@@ -6,7 +6,7 @@ export default function Skills() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <Reveal>
         <h1 className="page-title mb-10">
-          <span className="gradient-text">Skills</span>
+          Skills
         </h1>
       </Reveal>
       <div className="grid gap-6 sm:grid-cols-2">

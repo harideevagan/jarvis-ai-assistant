@@ -7,9 +7,9 @@ export default function Services() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <Reveal>
         <h1 className="page-title">
-          <span className="gradient-text">Services</span>
+          Services
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-300 mb-10">
+        <p className="text-lg text-slate-600 mb-10">
           Tell Jarvis about your business and requirements, and it can help scope the right solution — or
           reach out directly below.
         </p>

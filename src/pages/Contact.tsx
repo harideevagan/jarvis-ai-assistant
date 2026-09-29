@@ -48,9 +48,9 @@ export default function Contact() {
     <div className="max-w-3xl mx-auto px-4 py-16">
       <Reveal>
       <h1 className="page-title">
-        Contact <span className="gradient-text">Harideevagan</span>
+        Contact Harideevagan
       </h1>
-      <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
+      <p className="text-lg text-slate-600 mb-8">
         Share a few details about your project, or reach out directly.
       </p>
       </Reveal>
@@ -90,7 +90,7 @@ export default function Contact() {
 
       <Reveal delay={0.15}>
       {status === "sent" ? (
-        <div className="rounded-xl border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-6 text-sm">
+        <div className="rounded-xl border border-green-300 bg-green-50 p-6 text-sm">
           Thanks — your details have been sent. Harideevagan will follow up with you personally.
         </div>
       ) : (
@@ -109,7 +109,7 @@ export default function Contact() {
               value={form.description}
               onChange={(e) => update("description", e.target.value)}
               rows={4}
-              className="w-full rounded-xl border border-slate-300/80 dark:border-white/10 bg-white/50 dark:bg-white/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
           </div>
           <div className="sm:col-span-2 flex items-center gap-3">
@@ -152,7 +152,7 @@ function Field({
         value={value}
         required={required}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-300/80 dark:border-white/10 bg-white/50 dark:bg-white/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+        className="w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
       />
     </div>
   );

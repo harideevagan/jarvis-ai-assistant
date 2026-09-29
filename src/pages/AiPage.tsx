@@ -6,9 +6,9 @@ export default function AiPage() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <Reveal>
         <h1 className="page-title">
-          AI <span className="gradient-text">Assistant</span>
+          AI Assistant
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
+        <p className="text-lg text-slate-600 mb-8">
           Jarvis can answer questions about Harideevagan's work, scope a project with you, and search the
           live web for anything current.
         </p>

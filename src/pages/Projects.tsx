@@ -6,7 +6,7 @@ export default function Projects() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <Reveal>
         <h1 className="page-title mb-10">
-          <span className="gradient-text">Projects</span>
+          Projects
         </h1>
       </Reveal>
       <div className="grid gap-6 sm:grid-cols-2">
@@ -14,7 +14,7 @@ export default function Projects() {
           <Reveal key={p.title} delay={(i % 2) * 0.1}>
             <div className="card-lift p-6 h-full">
               <h2 className="font-semibold text-xl mb-3">{p.title}</h2>
-              <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-300 space-y-1">
+              <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
                 {p.points.map((pt) => (
                   <li key={pt}>{pt}</li>
                 ))}

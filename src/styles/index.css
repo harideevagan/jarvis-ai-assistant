@@ -4,10 +4,12 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: light;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors;
+  @apply text-slate-900 font-sans;
+  background: #f7f7f8;
 }
 
 h1,
@@ -16,169 +18,62 @@ h3 {
   @apply font-display;
 }
 
-/* ---------- Animated background (pure CSS, GPU-friendly) ---------- */
-.bg-aurora {
-  position: fixed;
-  inset: 0;
-  z-index: -10;
-  overflow: hidden;
-  pointer-events: none;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-}
-.dark .bg-aurora {
-  background: linear-gradient(180deg, #020617 0%, #0b1030 100%);
-}
-.aurora-blob {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.45;
-  will-change: transform;
-  animation: drift 28s ease-in-out infinite alternate;
-}
-.dark .aurora-blob {
-  opacity: 0.35;
-}
-.aurora-blob.b1 {
-  width: 46vw;
-  height: 46vw;
-  top: -12vw;
-  left: -8vw;
-  background: #818cf8;
-}
-.aurora-blob.b2 {
-  width: 40vw;
-  height: 40vw;
-  top: 30vh;
-  right: -10vw;
-  background: #38bdf8;
-  animation-duration: 34s;
-  animation-delay: -8s;
-}
-.aurora-blob.b3 {
-  width: 38vw;
-  height: 38vw;
-  bottom: -14vw;
-  left: 25vw;
-  background: #a78bfa;
-  animation-duration: 40s;
-  animation-delay: -16s;
-}
-.dark .aurora-blob.b1 {
-  background: #3730a3;
-}
-.dark .aurora-blob.b2 {
-  background: #1e3a8a;
-}
-.dark .aurora-blob.b3 {
-  background: #5b21b6;
-}
-@keyframes drift {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(6vw, 5vh, 0) scale(1.12);
-  }
-  100% {
-    transform: translate3d(-5vw, 9vh, 0) scale(0.96);
-  }
-}
-
-/* ---------- Glass + cards ---------- */
-.glass {
-  @apply bg-white/60 dark:bg-slate-900/50 backdrop-blur-xl border border-white/60 dark:border-white/10;
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
-}
-.dark .glass {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
+/* ---------- Cards ---------- */
 .card-lift {
-  @apply glass rounded-2xl;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  @apply rounded-2xl bg-white border border-slate-200;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .card-lift:hover {
-  transform: translateY(-6px);
-  border-color: rgba(91, 124, 250, 0.55);
-  box-shadow: 0 18px 44px rgba(91, 124, 250, 0.25);
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 .chip {
-  @apply text-xs rounded-full px-3 py-1 bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 backdrop-blur;
+  @apply text-xs rounded-full px-3 py-1 bg-white border border-slate-200 text-slate-600;
 }
 
 /* ---------- Typography ---------- */
 .page-title {
-  @apply text-4xl sm:text-5xl font-bold tracking-tight mb-4;
+  @apply text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-slate-900;
 }
 .section-title {
   @apply text-2xl sm:text-3xl font-semibold tracking-tight mt-12 mb-4;
 }
-.gradient-text {
-  background-image: linear-gradient(100deg, #6366f1, #38bdf8, #a78bfa, #6366f1);
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: gradient-shift 8s linear infinite;
-}
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 300% 50%;
-  }
-}
 
 /* ---------- Buttons ---------- */
 .btn-primary {
-  @apply rounded-xl bg-gradient-to-r from-brand-500 to-indigo-500 text-white px-5 py-2.5 text-sm font-medium;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  @apply rounded-xl bg-slate-900 text-white px-5 py-2.5 text-sm font-medium;
+  transition: background-color 0.2s ease;
 }
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 0 24px rgba(91, 124, 250, 0.6);
+  @apply bg-slate-700;
 }
 .btn-ghost {
-  @apply rounded-xl glass px-5 py-2.5 text-sm font-medium;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  @apply rounded-xl bg-white border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-800;
+  transition: background-color 0.2s ease;
 }
 .btn-ghost:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(91, 124, 250, 0.22);
+  @apply bg-slate-100;
 }
 
-/* ---------- Logo / mic / typing animations ---------- */
-.logo-glow {
-  animation: logo-pulse 2.6s ease-in-out infinite;
-}
-@keyframes logo-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(91, 124, 250, 0.55), 0 0 10px rgba(91, 124, 250, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 0 7px rgba(91, 124, 250, 0), 0 0 22px rgba(91, 124, 250, 0.85);
-  }
-}
+/* ---------- Chat helpers ---------- */
 .mic-listening {
   animation: mic-pulse 1.2s ease-in-out infinite;
-  @apply border-red-500 bg-red-500/15;
+  @apply text-red-500 bg-red-50;
 }
 @keyframes mic-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
   }
 }
 .typing-dot {
   display: inline-block;
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 9999px;
   background: currentColor;
   animation: dot-bounce 1.1s ease-in-out infinite;
@@ -194,19 +89,12 @@ h3 {
   60%,
   100% {
     transform: translateY(0);
-    opacity: 0.45;
+    opacity: 0.4;
   }
   30% {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
     opacity: 1;
   }
-}
-.hero-orb {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(70px);
-  pointer-events: none;
-  animation: drift 20s ease-in-out infinite alternate;
 }
 
 .prose-chat p {
@@ -225,10 +113,6 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-blob,
-  .hero-orb,
-  .gradient-text,
-  .logo-glow,
   .mic-listening,
   .typing-dot {
     animation: none;
