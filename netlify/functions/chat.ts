@@ -3,7 +3,7 @@ import { callModel, sanitizeOutput, type ChatMessage } from "./lib/modelClient";
 import { buildSystemPrompt } from "./lib/knowledge";
 import { corsHeaders, jsonResponse, isRateLimited, isValidMessage } from "./lib/security";
 
-const MAX_HISTORY_MESSAGES = 12;
+const MAX_HISTORY_MESSAGES = 6;
 
 type IncomingMessage = { role: "user" | "assistant"; content: string };
 
