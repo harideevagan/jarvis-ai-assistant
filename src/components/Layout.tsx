@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { contact } from "../data/contact";
 
 const navLinks = [
@@ -31,11 +32,16 @@ export default function Layout({ children }: { children: ReactNode }) {
   }, [dark]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 backdrop-blur bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800">
+    <div className="relative isolate min-h-screen flex flex-col">
+      <div className="bg-aurora" aria-hidden="true">
+        <div className="aurora-blob b1" />
+        <div className="aurora-blob b2" />
+        <div className="aurora-blob b3" />
+      </div>
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/60 dark:bg-slate-950/50 border-b border-white/60 dark:border-white/10 shadow-[0_4px_30px_rgba(15,23,42,0.08)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.35)]">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-bold text-lg">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-white">
+          <Link to="/" className="flex items-center gap-2 font-bold text-lg font-display">
+            <span className="logo-glow inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-indigo-500 text-white font-display">
               J
             </span>
             <span>
@@ -51,11 +57,18 @@ export default function Layout({ children }: { children: ReactNode }) {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`hover:text-brand-500 transition-colors ${
+                className={`relative py-1 hover:text-brand-500 transition-colors ${
                   location.pathname === link.to ? "text-brand-500" : "text-slate-600 dark:text-slate-300"
                 }`}
               >
                 {link.label}
+                {location.pathname === link.to && (
+                  <motion.span
+                    layoutId="nav-underline"
+                    className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-gradient-to-r from-brand-500 to-sky-400 shadow-[0_0_10px_rgba(91,124,250,0.9)]"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
               </Link>
             ))}
           </nav>
@@ -63,7 +76,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <button
             aria-label="Toggle dark mode"
             onClick={() => setDark((d) => !d)}
-            className="rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="rounded-full glass px-3 py-1.5 text-sm hover:scale-110 transition-transform"
           >
             {dark ? "🌙" : "☀️"}
           </button>
@@ -79,10 +92,10 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-slate-200 dark:border-slate-800 mt-16">
+      <footer className="border-t border-white/60 dark:border-white/10 backdrop-blur-xl bg-white/40 dark:bg-slate-950/40 mt-20">
         <div className="max-w-6xl mx-auto px-4 py-10 grid gap-8 sm:grid-cols-2">
           <div>
-            <div className="font-bold text-lg">JARVIS</div>
+            <div className="font-bold text-lg font-display gradient-text inline-block">JARVIS</div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               AI Assistant created by Harideevagan M
             </p>

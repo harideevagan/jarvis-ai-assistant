@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 type Role = "user" | "assistant";
 type Message = {
@@ -157,8 +158,8 @@ export default function ChatWidget() {
   }
 
   return (
-    <div className="flex flex-col h-[70vh] max-h-[720px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
+    <div className="glass flex flex-col h-[70vh] max-h-[720px] rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(91,124,250,0.18)] ring-1 ring-brand-500/20">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/50 dark:border-white/10">
         <div className="text-sm font-medium text-slate-500 dark:text-slate-400">
           Ask Jarvis anything
         </div>
@@ -192,13 +193,20 @@ export default function ChatWidget() {
           </div>
         )}
 
+        <AnimatePresence initial={false}>
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+          <motion.div
+            key={msg.id}
+            initial={{ opacity: 0, y: 14, x: msg.role === "user" ? 16 : -16 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+          >
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm prose-chat whitespace-pre-wrap ${
                 msg.role === "user"
-                  ? "bg-brand-500 text-white rounded-br-sm"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-sm"
+                  ? "bg-gradient-to-br from-brand-500 to-indigo-500 text-white rounded-br-sm shadow-[0_4px_18px_rgba(91,124,250,0.35)]"
+                  : "bg-white/70 dark:bg-white/10 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-100 rounded-bl-sm"
               }`}
             >
               <p>{msg.content}</p>
@@ -217,15 +225,24 @@ export default function ChatWidget() {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         ))}
+        </AnimatePresence>
 
         {loading && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl rounded-bl-sm bg-slate-100 dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-500">
-              Jarvis is thinking…
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-start"
+            role="status"
+            aria-label="Jarvis is thinking"
+          >
+            <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm bg-white/70 dark:bg-white/10 border border-white/60 dark:border-white/10 px-4 py-3 text-brand-500">
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+              <span className="typing-dot" />
             </div>
-          </div>
+          </motion.div>
         )}
 
         {error && (
@@ -235,7 +252,7 @@ export default function ChatWidget() {
         )}
       </div>
 
-      <div className="border-t border-slate-200 dark:border-slate-800 p-3">
+      <div className="border-t border-white/50 dark:border-white/10 p-3">
         {messages.some((m) => m.role === "assistant") && !loading && (
           <button
             onClick={regenerate}
@@ -256,16 +273,16 @@ export default function ChatWidget() {
             }}
             rows={1}
             placeholder="Ask Jarvis anything..."
-            className="flex-1 resize-none rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="flex-1 resize-none rounded-3xl border border-slate-300/80 dark:border-white/10 bg-white/60 dark:bg-white/5 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:shadow-[0_0_18px_rgba(91,124,250,0.35)] transition-shadow"
           />
           <button
             type="button"
             onClick={toggleListen}
             aria-label="Voice input"
-            className={`rounded-xl border px-3 py-2 text-sm ${
+            className={`rounded-full border px-3 py-2.5 text-sm transition-colors ${
               listening
-                ? "border-brand-500 bg-brand-50 dark:bg-brand-900/30"
-                : "border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "mic-listening"
+                : "border-slate-300/80 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/10"
             }`}
           >
             🎤
@@ -273,7 +290,7 @@ export default function ChatWidget() {
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="rounded-xl bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+            className="btn-primary !rounded-full !px-5 disabled:opacity-50 disabled:hover:shadow-none"
           >
             Ask
           </button>
