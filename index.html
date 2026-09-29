@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>JARVIS — Harideevagan's AI Assistant</title>
+    <meta
+      name="description"
+      content="JARVIS is an AI assistant for Harideevagan's technology, projects, services, and live web research."
+    />
+    <meta name="author" content="Harideevagan M" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://jarvis.harideevagan.netlify.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="JARVIS — Harideevagan's AI Assistant" />
+    <meta
+      property="og:description"
+      content="Ask Jarvis anything about Harideevagan's technology, projects, and services — with live web research."
+    />
+    <meta property="og:url" content="https://jarvis.harideevagan.netlify.app/" />
+    <meta property="og:site_name" content="JARVIS" />
+    <meta property="og:image" content="/og-image.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JARVIS — Harideevagan's AI Assistant" />
+    <meta
+      name="twitter:description"
+      content="Ask Jarvis anything about Harideevagan's technology, projects, and services — with live web research."
+    />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Harideevagan M",
+        "url": "https://harideevagan.netlify.app",
+        "sameAs": ["https://linkedin.com/in/harideevagan-m"],
+        "jobTitle": "Full-Stack Architect, LLM Engineer, Odoo ERP Specialist, Automation Architect"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "JARVIS — Harideevagan's AI Assistant",
+        "url": "https://jarvis.harideevagan.netlify.app/"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "JARVIS",
+        "applicationCategory": "AI Assistant",
+        "operatingSystem": "Web",
+        "creator": { "@type": "Person", "name": "Harideevagan M" }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Static form so Netlify's build-time form detection picks this up.
+         The real submission happens via fetch() from Contact.tsx. -->
+    <form name="jarvis-leads" data-netlify="true" netlify-honeypot="company-website" hidden>
+      <input type="text" name="name" />
+      <input type="text" name="company" />
+      <input type="email" name="email" />
+      <input type="text" name="phone" />
+      <input type="text" name="country" />
+      <input type="text" name="service" />
+      <textarea name="description"></textarea>
+      <input type="text" name="timeline" />
+      <input type="text" name="budget" />
+      <input type="text" name="company-website" />
+    </form>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
