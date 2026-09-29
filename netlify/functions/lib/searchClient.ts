@@ -29,7 +29,7 @@ export async function webSearch(query: string, maxResults = 5): Promise<SearchRe
       max_results: maxResults,
       include_answer: false,
     }),
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(5000),
   });
 
   if (!res.ok) {

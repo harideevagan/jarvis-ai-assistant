@@ -5,7 +5,7 @@ import { buildSystemPrompt } from "./lib/knowledge";
 import { corsHeaders, jsonResponse, isRateLimited, isValidMessage } from "./lib/security";
 
 const MAX_HISTORY_MESSAGES = 12;
-const MAX_TOOL_ROUNDS = 3;
+const MAX_TOOL_ROUNDS = 2;
 
 const tools: ToolDefinition[] = [
   {

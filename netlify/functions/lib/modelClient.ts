@@ -56,7 +56,7 @@ export async function callModel(
       Authorization: `Bearer ${API_KEY}`,
     },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(30000),
+    signal: AbortSignal.timeout(8000),
   });
 
   if (!res.ok) {
