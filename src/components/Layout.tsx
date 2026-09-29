@@ -1,20 +1,8 @@
 import type { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { contact } from "../data/contact";
 
-const navLinks = [
-  { to: "/about", label: "About" },
-  { to: "/services", label: "Services" },
-  { to: "/projects", label: "Projects" },
-  { to: "/skills", label: "Skills" },
-  { to: "/ai", label: "AI Assistant" },
-  { to: "/contact", label: "Contact" },
-];
-
 export default function Layout({ children }: { children: ReactNode }) {
-  const location = useLocation();
-
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
@@ -31,35 +19,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`relative py-1 hover:text-slate-900 transition-colors ${
-                  location.pathname === link.to ? "text-slate-900" : "text-slate-500"
-                }`}
-              >
-                {link.label}
-                {location.pathname === link.to && (
-                  <motion.span
-                    layoutId="nav-underline"
-                    className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-slate-900"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-              </Link>
-            ))}
-          </nav>
-
         </div>
-        <nav className="md:hidden flex gap-4 overflow-x-auto px-4 pb-2 text-sm font-medium">
-          {navLinks.map((link) => (
-            <Link key={link.to} to={link.to} className="whitespace-nowrap text-slate-600">
-              {link.label}
-            </Link>
-          ))}
-        </nav>
       </header>
 
       <main className="flex-1">{children}</main>
@@ -73,6 +33,9 @@ export default function Layout({ children }: { children: ReactNode }) {
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm sm:justify-end">
+            <Link to="/ai" className="text-slate-600 hover:text-slate-900">
+              AI Assistant
+            </Link>
             <Link to="/about" className="text-slate-600 hover:text-slate-900">
               About
             </Link>
@@ -81,9 +44,6 @@ export default function Layout({ children }: { children: ReactNode }) {
             </Link>
             <Link to="/projects" className="text-slate-600 hover:text-slate-900">
               Projects
-            </Link>
-            <Link to="/ai" className="text-slate-600 hover:text-slate-900">
-              AI Assistant
             </Link>
             <Link to="/contact" className="text-slate-600 hover:text-slate-900">
               Contact
