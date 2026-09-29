@@ -27,7 +27,7 @@ function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export default function ChatWidget() {
+export default function ChatWidget({ className = "min-h-[32rem]" }: { className?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,11 +35,12 @@ export default function ChatWidget() {
   const [language, setLanguage] = useState("Auto-detect");
   const [listening, setListening] = useState(false);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (messages.length === 0) return;
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, loading]);
 
   async function sendMessage(text: string) {
@@ -157,146 +158,148 @@ export default function ChatWidget() {
     window.speechSynthesis.speak(utter);
   }
 
+  const composer = (
+    <form
+      onSubmit={handleSubmit}
+      className="flex items-end gap-1 rounded-full bg-white pl-5 pr-2 py-2 shadow-[0_2px_16px_rgba(15,23,42,0.10)] ring-1 ring-transparent focus-within:ring-slate-300 transition-shadow"
+    >
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(input);
+          }
+        }}
+        rows={1}
+        placeholder="Message Jarvis"
+        className="flex-1 resize-none bg-transparent py-2 text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none max-h-40"
+      />
+      <button
+        type="button"
+        onClick={toggleListen}
+        aria-label="Voice input"
+        className={`h-10 w-10 shrink-0 inline-flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition-colors ${
+          listening ? "mic-listening" : ""
+        }`}
+      >
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="9" y="3" width="6" height="12" rx="3" />
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+        </svg>
+      </button>
+      <button
+        type="submit"
+        disabled={loading || !input.trim()}
+        aria-label="Send message"
+        className="h-10 w-10 shrink-0 inline-flex items-center justify-center rounded-full bg-black text-white hover:bg-slate-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 19V5M5 12l7-7 7 7" />
+        </svg>
+      </button>
+    </form>
+  );
+
+  const controls = (
+    <div className="flex items-center justify-end gap-1 text-xs text-slate-500">
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        className="rounded-md bg-transparent px-2 py-1 hover:bg-slate-200/60 focus:outline-none cursor-pointer"
+        aria-label="Response language"
+      >
+        {LANGUAGES.map((lng) => (
+          <option key={lng} value={lng}>
+            {lng}
+          </option>
+        ))}
+      </select>
+      <button onClick={clearChat} className="rounded-md px-2 py-1 hover:bg-slate-200/60">
+        New conversation
+      </button>
+    </div>
+  );
+
+  const empty = messages.length === 0 && !loading;
+
   return (
-    <div className="flex flex-col h-[75vh] max-h-[760px] rounded-2xl border border-slate-200 bg-white overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-200">
-        <div className="text-sm font-medium text-slate-500">Ask Jarvis anything</div>
-        <div className="flex items-center gap-2">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="text-xs rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-600"
-            aria-label="Response language"
-          >
-            {LANGUAGES.map((lng) => (
-              <option key={lng} value={lng}>
-                {lng}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={clearChat}
-            className="text-xs rounded-md px-2 py-1 text-slate-600 hover:bg-slate-100"
-          >
-            New conversation
-          </button>
+    <div className={`flex flex-col ${className}`}>
+      {controls}
+
+      {empty ? (
+        <div className="flex-1 flex flex-col items-center justify-center gap-8 pb-12">
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-900 text-center">
+            What can I help with?
+          </h2>
+          <div className="w-full max-w-3xl">{composer}</div>
+          {error && (
+            <div className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</div>
+          )}
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="flex-1 w-full max-w-3xl mx-auto">
+            <AnimatePresence initial={false}>
+              {messages.map((msg) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="flex gap-4 py-5"
+                >
+                  <Avatar role={msg.role} />
+                  <div className="flex-1 min-w-0 text-[15px] leading-relaxed text-slate-800 prose-chat whitespace-pre-wrap">
+                    <p>{msg.content}</p>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        {messages.length === 0 && (
-          <div className="text-sm text-slate-500 text-center mt-16 px-6">
-            Ask about Harideevagan's projects, services, Odoo/AI work, or anything else — Jarvis is
-            happy to help.
-          </div>
-        )}
+                    {msg.role === "assistant" && (
+                      <div className="mt-2 flex gap-3 text-xs text-slate-400">
+                        <button onClick={() => copyMessage(msg.content)} className="hover:text-slate-700">
+                          Copy
+                        </button>
+                        <button onClick={() => toggleSpeak(msg)} className="hover:text-slate-700">
+                          {speakingId === msg.id ? "⏹ Stop" : "🔊 Listen"}
+                        </button>
+                        <button onClick={() => shareMessage(msg.content)} className="hover:text-slate-700">
+                          Share
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
 
-        <AnimatePresence initial={false}>
-          {messages.map((msg) => (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className={msg.role === "assistant" ? "bg-slate-50" : "bg-white"}
-            >
-              <div className="max-w-3xl mx-auto flex gap-4 px-4 py-5">
-                <Avatar role={msg.role} />
-                <div className="flex-1 min-w-0 text-[15px] leading-relaxed text-slate-800 prose-chat whitespace-pre-wrap">
-                  <p>{msg.content}</p>
-
-                  {msg.role === "assistant" && (
-                    <div className="mt-2 flex gap-3 text-xs text-slate-400">
-                      <button onClick={() => copyMessage(msg.content)} className="hover:text-slate-700">
-                        Copy
-                      </button>
-                      <button onClick={() => toggleSpeak(msg)} className="hover:text-slate-700">
-                        {speakingId === msg.id ? "⏹ Stop" : "🔊 Listen"}
-                      </button>
-                      <button onClick={() => shareMessage(msg.content)} className="hover:text-slate-700">
-                        Share
-                      </button>
-                    </div>
-                  )}
+            {loading && (
+              <div className="flex gap-4 py-5" role="status" aria-label="Jarvis is thinking">
+                <Avatar role="assistant" />
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
                 </div>
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+            )}
 
-        {loading && (
-          <div className="bg-slate-50" role="status" aria-label="Jarvis is thinking">
-            <div className="max-w-3xl mx-auto flex gap-4 px-4 py-5">
-              <Avatar role="assistant" />
-              <div className="flex items-center gap-1.5 text-slate-400">
-                <span className="typing-dot" />
-                <span className="typing-dot" />
-                <span className="typing-dot" />
-              </div>
-            </div>
+            {error && <div className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 my-3">{error}</div>}
+            <div ref={endRef} />
           </div>
-        )}
 
-        {error && (
-          <div className="max-w-3xl mx-auto px-4 py-3">
-            <div className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</div>
+          <div className="sticky bottom-4 w-full max-w-3xl mx-auto pt-3">
+            {messages.some((m) => m.role === "assistant") && !loading && (
+              <button
+                onClick={regenerate}
+                className="mb-2 ml-2 text-xs rounded-md px-2 py-1 text-slate-500 bg-[#f7f7f8] hover:bg-slate-200/60"
+              >
+                ↻ Regenerate
+              </button>
+            )}
+            {composer}
           </div>
-        )}
-      </div>
-
-      <div className="px-4 pb-4 pt-2">
-        <div className="max-w-3xl mx-auto">
-          {messages.some((m) => m.role === "assistant") && !loading && (
-            <button
-              onClick={regenerate}
-              className="mb-2 text-xs rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
-            >
-              ↻ Regenerate
-            </button>
-          )}
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-end gap-1 rounded-3xl border border-slate-300 bg-white pl-4 pr-2 py-2 shadow-sm focus-within:border-slate-400"
-          >
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage(input);
-                }
-              }}
-              rows={1}
-              placeholder="Message Jarvis"
-              className="flex-1 resize-none bg-transparent py-1.5 text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none max-h-40"
-            />
-            <button
-              type="button"
-              onClick={toggleListen}
-              aria-label="Voice input"
-              className={`h-9 w-9 shrink-0 inline-flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition-colors ${
-                listening ? "mic-listening" : ""
-              }`}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="9" y="3" width="6" height="12" rx="3" />
-                <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
-              </svg>
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              aria-label="Send message"
-              className="h-9 w-9 shrink-0 inline-flex items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

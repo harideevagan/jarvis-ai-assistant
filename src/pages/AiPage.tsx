@@ -1,21 +1,10 @@
 import ChatWidget from "../components/ChatWidget";
-import Reveal from "../components/Reveal";
 
 export default function AiPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16">
-      <Reveal>
-        <h1 className="page-title">
-          AI Assistant
-        </h1>
-        <p className="text-lg text-slate-600 mb-8">
-          Jarvis can answer questions about Harideevagan's work, scope a project with you, and search the
-          live web for anything current.
-        </p>
-      </Reveal>
-      <Reveal delay={0.1}>
-        <ChatWidget />
-      </Reveal>
+    <div className="max-w-4xl mx-auto px-4 pt-3 pb-6">
+      <h1 className="sr-only">AI Assistant</h1>
+      <ChatWidget className="min-h-[calc(100dvh-9rem)]" />
     </div>
   );
 }
