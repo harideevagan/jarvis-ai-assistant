@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import Markdown, { markdownToSpeech } from "./Markdown";
 import { Check, Copy, Globe, Mic, Plus, Refresh, Send, Share, Speaker, Stop } from "./Icons";
 
 type Role = "user" | "assistant";
@@ -6,6 +8,9 @@ type Message = {
   id: string;
   role: Role;
   content: string;
+  // Friendly local replies (slow server, rate limit). Never sent to the server.
+  isNotice?: boolean;
+  retry?: boolean;
 };
 
 const LANGUAGES = [
@@ -28,6 +33,13 @@ const SUGGESTIONS = [
   "I need an Odoo module",
   "I already have a quote from another company",
 ];
+
+const NOTICES = [
+  'That one is too big for my small server. Hari can build almost anything, but the server budget is another story. Try a shorter question, like "How does an Odoo project work?" or "What does Hari build?"',
+  "My server just ran out of breath. Hari knows a lot, but he also keeps a small budget, so I only get a small server. Ask me something smaller and I will be quick.",
+  "Too heavy for my small server. The good news is that Hari's knowledge is big. The bad news is that the budget is small. Send a shorter question, or ask Hari directly on the Contact page.",
+];
+const RATE_NOTICE = "You are sending messages very fast. Wait a few seconds and try again.";
 
 const MAX_TEXTAREA_PX = 120; // about five lines at 16px / 1.5
 
@@ -53,6 +65,7 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
+  const lastNoticeRef = useRef(-1);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -100,13 +113,24 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
     };
   }, [langOpen]);
 
-  async function sendMessage(text: string) {
+  function pickNotice(): string {
+    let i = Math.floor(Math.random() * NOTICES.length);
+    if (i === lastNoticeRef.current) i = (i + 1 + Math.floor(Math.random() * (NOTICES.length - 1))) % NOTICES.length;
+    lastNoticeRef.current = i;
+    return NOTICES[i];
+  }
+
+  function addNotice(content: string, retry: boolean) {
+    setMessages((prev) => [...prev, { id: uid(), role: "assistant", content, isNotice: true, retry }]);
+  }
+
+  async function sendMessage(text: string, base: Message[] = messages) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
     const userMsg: Message = { id: uid(), role: "user", content: trimmed };
-    const history = messages.map((m) => ({ role: m.role, content: m.content }));
-    setMessages((prev) => [...prev, userMsg]);
+    const history = base.filter((m) => !m.isNotice).map((m) => ({ role: m.role, content: m.content }));
+    setMessages([...base, userMsg]);
     setInput("");
     setError(null);
     setLoading(true);
@@ -121,14 +145,16 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
         body: JSON.stringify({ message: trimmed + languageHint, history }),
       });
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        if (res.status === 429) {
-          throw new Error("Too many messages in a short time. Wait a minute, then send it again.");
-        }
-        if (res.status === 408 || res.status === 502 || res.status === 504) {
-          throw new Error("That took too long. Please send it again.");
-        }
+      if (res.status === 429) {
+        addNotice(RATE_NOTICE, false);
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      if (data === null || data.code === "timeout" || [408, 502, 504].includes(res.status)) {
+        addNotice(pickNotice(), true);
+        return;
+      }
+      if (!res.ok || typeof data.reply !== "string") {
         throw new Error("Jarvis could not answer that. Please send it again.");
       }
 
@@ -139,12 +165,11 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
-      const isNetwork = err instanceof TypeError;
-      setError(
-        isNetwork
-          ? "The message did not go through. Check your connection and send it again."
-          : (err as Error).message || "Jarvis could not answer that. Please send it again.",
-      );
+      if (err instanceof TypeError) {
+        addNotice(pickNotice(), true);
+      } else {
+        setError((err as Error).message || "Jarvis could not answer that. Please send it again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -158,11 +183,8 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
   function regenerate() {
     const lastUser = [...messages].reverse().find((m) => m.role === "user");
     if (!lastUser) return;
-    setMessages((prev) => {
-      const idx = prev.map((m) => m.id).lastIndexOf(lastUser.id);
-      return prev.slice(0, idx + 1);
-    });
-    sendMessage(lastUser.content);
+    const idx = messages.map((m) => m.id).lastIndexOf(lastUser.id);
+    sendMessage(lastUser.content, messages.slice(0, idx));
   }
 
   function clearChat() {
@@ -230,7 +252,7 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
       return;
     }
     window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(msg.content);
+    const utter = new SpeechSynthesisUtterance(markdownToSpeech(msg.content));
     utter.onend = () => setSpeakingId(null);
     setSpeakingId(msg.id);
     window.speechSynthesis.speak(utter);
@@ -320,7 +342,7 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
   );
 
   const empty = messages.length === 0 && !loading;
-  const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
+  const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant" && !m.isNotice)?.id;
 
   const errorBox = error && (
     <p role="alert" className="text-base text-ink border-l-2 border-ink pl-3 my-3 max-w-[68ch]">
@@ -340,19 +362,9 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
           <h2 className="font-serif font-semibold text-3xl sm:text-4xl text-center">
             Hello. What are you working on?
           </h2>
-          <ul className="mt-5 flex flex-col items-center">
-            {SUGGESTIONS.map((s) => (
-              <li key={s}>
-                <button
-                  type="button"
-                  onClick={() => sendMessage(s)}
-                  className="min-h-[44px] px-2 text-base text-muted hover:text-ink hover:underline underline-offset-4"
-                >
-                  {s}
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-5 flex flex-col items-center">
+            <Suggestions onPick={sendMessage} />
+          </div>
           <div className="w-full max-w-[720px] mt-6">{composer}</div>
           {errorBox}
         </div>
@@ -366,9 +378,27 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
                     {msg.content}
                   </p>
                 </div>
+              ) : msg.isNotice ? (
+                <div key={msg.id} className="msg-in py-3">
+                  <p className="max-w-[68ch]">{renderNotice(msg.content)}</p>
+                  {msg.retry && msg.id === messages[messages.length - 1].id && !loading && (
+                    <div className="mt-2">
+                      <Suggestions onPick={sendMessage} />
+                      <button
+                        type="button"
+                        onClick={regenerate}
+                        className="min-h-[44px] px-2 -ml-2 text-base text-indigo underline underline-offset-4"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div key={msg.id} className="msg-in reply py-3">
-                  <p className="max-w-[68ch] whitespace-pre-wrap">{msg.content}</p>
+                  <div className="max-w-[68ch]">
+                    <Markdown>{msg.content}</Markdown>
+                  </div>
                   <div className="reply-actions -ml-3 flex">
                     <button
                       type="button"
@@ -413,7 +443,7 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
             )}
 
             {errorBox}
-            <div ref={endRef} />
+            <div ref={endRef} style={{ scrollMarginBottom: "6rem" }} />
           </div>
 
           <div className="sticky bottom-0 bg-page composer-wrap">
@@ -422,5 +452,37 @@ export default function ChatWidget({ className = "" }: { className?: string }) {
         </>
       )}
     </div>
+  );
+}
+
+function Suggestions({ onPick }: { onPick: (text: string) => void }) {
+  return (
+    <ul className="flex flex-col items-start empty:hidden">
+      {SUGGESTIONS.map((s) => (
+        <li key={s}>
+          <button
+            type="button"
+            onClick={() => onPick(s)}
+            className="min-h-[44px] px-2 -ml-2 text-base text-muted hover:text-ink hover:underline underline-offset-4 text-left"
+          >
+            {s}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function renderNotice(text: string) {
+  const parts = text.split("Contact page");
+  if (parts.length === 1) return text;
+  return (
+    <>
+      {parts[0]}
+      <Link to="/contact" className="link">
+        Contact page
+      </Link>
+      {parts[1]}
+    </>
   );
 }

@@ -159,3 +159,100 @@ select {
     opacity: 0.6;
   }
 }
+
+/* ---------- Markdown in replies ---------- */
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md p,
+.md ul,
+.md ol,
+.md pre,
+.md .md-table {
+  margin: 0 0 0.75rem 0;
+}
+.md ul,
+.md ol {
+  padding-left: 1.4rem;
+}
+.md ul {
+  list-style: disc;
+}
+.md ol {
+  list-style: decimal;
+}
+.md li {
+  margin: 0.15rem 0;
+}
+.md li > p {
+  margin: 0;
+}
+.md strong {
+  font-weight: 600;
+}
+.md h1,
+.md h2,
+.md h3,
+.md h4 {
+  font-family: "Source Serif 4", "Noto Sans Tamil", "Noto Sans Devanagari", Georgia, serif;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1rem 0 0.4rem 0;
+}
+.md h1 {
+  font-size: 1.25rem;
+}
+.md h2 {
+  font-size: 1.15rem;
+}
+.md h3,
+.md h4 {
+  font-size: 1.05rem;
+}
+.md a {
+  color: #2f3e9e;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.md code {
+  background: #eef0f5;
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+.md pre {
+  background: #eef0f5;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+.md pre code {
+  background: none;
+  padding: 0;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.md .md-table {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.md table {
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.md th,
+.md td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid #e3e7ed;
+  overflow-wrap: normal;
+  vertical-align: top;
+}
+.md th {
+  font-weight: 600;
+  border-bottom: 2px solid #c5ccd6;
+}
