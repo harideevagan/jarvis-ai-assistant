@@ -1,17 +1,11 @@
-import Reveal from "../components/Reveal";
-
 export default function Blog() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16">
-      <Reveal>
-        <h1 className="page-title">
-          Blog
-        </h1>
-        <p className="text-lg text-slate-600">
-          Posts about Odoo ERP, AI engineering, and automation are on the way. Ask Jarvis in the meantime —
-          it can answer most of what would go here.
-        </p>
-      </Reveal>
+    <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16">
+      <h1 className="page-title">Blog</h1>
+      <p className="measure text-lg">
+        Posts about Odoo ERP, AI engineering, and automation are on the way. Until then, ask Jarvis. It can
+        answer most of what would go here.
+      </p>
     </div>
   );
 }

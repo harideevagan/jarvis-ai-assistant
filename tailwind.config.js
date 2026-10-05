@@ -4,19 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: "#eef4ff",
-          100: "#dae7ff",
-          300: "#9db8ff",
-          500: "#5b7cfa",
-          600: "#3f5fe0",
-          700: "#3149b3",
-          900: "#1a2359",
-        },
+        page: "#F7F8FA",
+        ink: "#1B2430",
+        muted: "#5B6676",
+        line: "#E3E7ED",
+        bubble: "#EEF0F5",
+        indigo: "#2F3E9E",
+        turmeric: "#D9A21B",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Space Grotesk", "Inter", "system-ui", "sans-serif"],
+        sans: ['"Public Sans"', '"Noto Sans Tamil"', '"Noto Sans Devanagari"', "system-ui", "sans-serif"],
+        serif: ['"Source Serif 4"', '"Noto Sans Tamil"', '"Noto Sans Devanagari"', "Georgia", "serif"],
+      },
+      borderRadius: {
+        ui: "8px",
       },
     },
   },

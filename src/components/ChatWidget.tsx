@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Check, Copy, Globe, Mic, Plus, Refresh, Send, Share, Speaker, Stop } from "./Icons";
 
 type Role = "user" | "assistant";
 type Message = {
@@ -23,25 +23,82 @@ const LANGUAGES = [
   "Urdu",
 ];
 
+const SUGGESTIONS = [
+  "What does Hari build?",
+  "I need an Odoo module",
+  "I already have a quote from another company",
+];
+
+const MAX_TEXTAREA_PX = 120; // about five lines at 16px / 1.5
+
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export default function ChatWidget({ className = "min-h-[32rem]" }: { className?: string }) {
+function reducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+export default function ChatWidget({ className = "" }: { className?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState("Auto-detect");
+  const [langOpen, setLangOpen] = useState(false);
   const [listening, setListening] = useState(false);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (messages.length === 0) return;
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    endRef.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "end" });
   }, [messages, loading]);
+
+  // Grow the textarea with its content, up to about five lines.
+  useLayoutEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_PX)}px`;
+  }, [input]);
+
+  // Keep the composer above the on-screen keyboard on browsers that
+  // shrink the visual viewport instead of the layout viewport (iOS Safari).
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const update = () => root.style.setProperty("--vvh", `${vv.height}px`);
+    update();
+    vv.addEventListener("resize", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      root.style.removeProperty("--vvh");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!langOpen) return;
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (!langRef.current?.contains(e.target as Node)) setLangOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLangOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [langOpen]);
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
@@ -64,9 +121,15 @@ export default function ChatWidget({ className = "min-h-[32rem]" }: { className?
         body: JSON.stringify({ message: trimmed + languageHint, history }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.error || "Something went wrong.");
+        if (res.status === 429) {
+          throw new Error("Too many messages in a short time. Wait a minute, then send it again.");
+        }
+        if (res.status === 408 || res.status === 502 || res.status === 504) {
+          throw new Error("That took too long. Please send it again.");
+        }
+        throw new Error("Jarvis could not answer that. Please send it again.");
       }
 
       const assistantMsg: Message = {
@@ -76,7 +139,12 @@ export default function ChatWidget({ className = "min-h-[32rem]" }: { className?
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
-      setError((err as Error).message || "JARVIS couldn't respond. Please try again.");
+      const isNetwork = err instanceof TypeError;
+      setError(
+        isNetwork
+          ? "The message did not go through. Check your connection and send it again."
+          : (err as Error).message || "Jarvis could not answer that. Please send it again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -98,19 +166,29 @@ export default function ChatWidget({ className = "min-h-[32rem]" }: { className?
   }
 
   function clearChat() {
+    window.speechSynthesis?.cancel();
+    setSpeakingId(null);
     setMessages([]);
     setError(null);
   }
 
-  function copyMessage(text: string) {
-    navigator.clipboard?.writeText(text).catch(() => {});
+  function flashCopied(id: string) {
+    setCopiedId(id);
+    window.setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 1500);
   }
 
-  function shareMessage(text: string) {
+  function copyMessage(msg: Message) {
+    navigator.clipboard
+      ?.writeText(msg.content)
+      .then(() => flashCopied(msg.id))
+      .catch(() => {});
+  }
+
+  function shareMessage(msg: Message) {
     if (navigator.share) {
-      navigator.share({ title: "JARVIS", text }).catch(() => {});
+      navigator.share({ title: "Jarvis", text: msg.content }).catch(() => {});
     } else {
-      copyMessage(text);
+      copyMessage(msg);
     }
   }
 
@@ -118,7 +196,7 @@ export default function ChatWidget({ className = "min-h-[32rem]" }: { className?
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError("Voice input isn't supported in this browser.");
+      setError("This browser can't take voice input. Type your message instead.");
       return;
     }
     if (listening) {
@@ -143,7 +221,7 @@ export default function ChatWidget({ className = "min-h-[32rem]" }: { className?
 
   function toggleSpeak(msg: Message) {
     if (!("speechSynthesis" in window)) {
-      setError("Text-to-speech isn't supported in this browser.");
+      setError("This browser can't read replies aloud.");
       return;
     }
     if (speakingId === msg.id) {
@@ -161,9 +239,10 @@ export default function ChatWidget({ className = "min-h-[32rem]" }: { className?
   const composer = (
     <form
       onSubmit={handleSubmit}
-      className="flex items-end gap-1 rounded-full bg-white pl-5 pr-2 py-2 shadow-[0_2px_16px_rgba(15,23,42,0.10)] ring-1 ring-transparent focus-within:ring-slate-300 transition-shadow"
+      className="flex items-end gap-1 rounded-full bg-white border border-line pl-5 pr-1.5 py-1.5 focus-within:border-indigo focus-within:ring-2 focus-within:ring-indigo"
     >
       <textarea
+        ref={textareaRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
@@ -173,148 +252,175 @@ export default function ChatWidget({ className = "min-h-[32rem]" }: { className?
           }
         }}
         rows={1}
-        placeholder="Message Jarvis"
-        className="flex-1 resize-none bg-transparent py-2 text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none max-h-40"
+        placeholder="Write a message"
+        aria-label="Write a message"
+        className="flex-1 min-w-0 resize-none bg-transparent py-2.5 text-base leading-6 text-ink placeholder:text-muted focus:outline-none"
+        style={{ maxHeight: MAX_TEXTAREA_PX }}
       />
       <button
         type="button"
         onClick={toggleListen}
-        aria-label="Voice input"
-        className={`h-10 w-10 shrink-0 inline-flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition-colors ${
-          listening ? "mic-listening" : ""
+        aria-label={listening ? "Stop voice input" : "Voice input"}
+        aria-pressed={listening}
+        className={`h-11 w-11 shrink-0 inline-flex items-center justify-center rounded-full hover:bg-bubble ${
+          listening ? "text-turmeric" : "text-muted"
         }`}
       >
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect x="9" y="3" width="6" height="12" rx="3" />
-          <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
-        </svg>
+        <Mic size={22} />
       </button>
       <button
         type="submit"
         disabled={loading || !input.trim()}
         aria-label="Send message"
-        className="h-10 w-10 shrink-0 inline-flex items-center justify-center rounded-full bg-black text-white hover:bg-slate-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
+        className="h-11 w-11 shrink-0 inline-flex items-center justify-center rounded-full bg-indigo text-white hover:bg-[#263380] disabled:bg-line disabled:text-muted"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M12 19V5M5 12l7-7 7 7" />
-        </svg>
+        <Send size={22} />
       </button>
     </form>
   );
 
-  const controls = (
-    <div className="flex items-center justify-end gap-1 text-xs text-slate-500">
-      <select
-        value={language}
-        onChange={(e) => setLanguage(e.target.value)}
-        className="rounded-md bg-transparent px-2 py-1 hover:bg-slate-200/60 focus:outline-none cursor-pointer"
-        aria-label="Response language"
-      >
-        {LANGUAGES.map((lng) => (
-          <option key={lng} value={lng}>
-            {lng}
-          </option>
-        ))}
-      </select>
-      <button onClick={clearChat} className="rounded-md px-2 py-1 hover:bg-slate-200/60">
-        New conversation
+  const toolbar = (
+    <div className="flex justify-end gap-1 px-2 pt-1" ref={langRef}>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setLangOpen((o) => !o)}
+          aria-label={`Reply language: ${language}`}
+          aria-haspopup="true"
+          aria-expanded={langOpen}
+          className="icon-btn"
+        >
+          <Globe size={22} />
+        </button>
+        {langOpen && (
+          <ul className="absolute right-0 top-full z-30 mt-1 w-52 max-h-[60vh] overflow-y-auto rounded-ui border border-line bg-white py-1">
+            {LANGUAGES.map((lng) => (
+              <li key={lng}>
+                <button
+                  type="button"
+                  aria-current={lng === language}
+                  onClick={() => {
+                    setLanguage(lng);
+                    setLangOpen(false);
+                  }}
+                  className="flex w-full items-center justify-between gap-2 px-4 min-h-[44px] text-left text-base text-ink hover:bg-bubble"
+                >
+                  <span>{lng}</span>
+                  {lng === language && <Check size={20} className="text-indigo" />}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <button type="button" onClick={clearChat} aria-label="New chat" className="icon-btn">
+        <Plus size={22} />
       </button>
     </div>
   );
 
   const empty = messages.length === 0 && !loading;
+  const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
+
+  const errorBox = error && (
+    <p role="alert" className="text-base text-ink border-l-2 border-ink pl-3 my-3 max-w-[68ch]">
+      {error}
+    </p>
+  );
 
   return (
-    <div className={`flex flex-col ${className}`}>
-      {controls}
+    <div
+      className={`flex flex-col ${className}`}
+      style={{ minHeight: "calc(var(--vvh, 100dvh) - 3.5rem)" }}
+    >
+      {toolbar}
 
       {empty ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-8 pb-12">
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-900 text-center">
-            What can I help with?
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-10 composer-wrap">
+          <h2 className="font-serif font-semibold text-3xl sm:text-4xl text-center">
+            Hello. What are you working on?
           </h2>
-          <div className="w-full max-w-3xl">{composer}</div>
-          {error && (
-            <div className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</div>
-          )}
+          <ul className="mt-5 flex flex-col items-center">
+            {SUGGESTIONS.map((s) => (
+              <li key={s}>
+                <button
+                  type="button"
+                  onClick={() => sendMessage(s)}
+                  className="min-h-[44px] px-2 text-base text-muted hover:text-ink hover:underline underline-offset-4"
+                >
+                  {s}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="w-full max-w-[720px] mt-6">{composer}</div>
+          {errorBox}
         </div>
       ) : (
         <>
-          <div className="flex-1 w-full max-w-3xl mx-auto">
-            <AnimatePresence initial={false}>
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="flex gap-4 py-5"
-                >
-                  <Avatar role={msg.role} />
-                  <div className="flex-1 min-w-0 text-[15px] leading-relaxed text-slate-800 prose-chat whitespace-pre-wrap">
-                    <p>{msg.content}</p>
-
-                    {msg.role === "assistant" && (
-                      <div className="mt-2 flex gap-3 text-xs text-slate-400">
-                        <button onClick={() => copyMessage(msg.content)} className="hover:text-slate-700">
-                          Copy
-                        </button>
-                        <button onClick={() => toggleSpeak(msg)} className="hover:text-slate-700">
-                          {speakingId === msg.id ? "⏹ Stop" : "🔊 Listen"}
-                        </button>
-                        <button onClick={() => shareMessage(msg.content)} className="hover:text-slate-700">
-                          Share
-                        </button>
-                      </div>
+          <div className="flex-1 w-full max-w-[720px] mx-auto px-4 pt-4">
+            {messages.map((msg) =>
+              msg.role === "user" ? (
+                <div key={msg.id} className="msg-in flex justify-end py-3">
+                  <p className="max-w-[85%] rounded-ui bg-bubble px-4 py-2.5 whitespace-pre-wrap">
+                    {msg.content}
+                  </p>
+                </div>
+              ) : (
+                <div key={msg.id} className="msg-in reply py-3">
+                  <p className="max-w-[68ch] whitespace-pre-wrap">{msg.content}</p>
+                  <div className="reply-actions -ml-3 flex">
+                    <button
+                      type="button"
+                      onClick={() => copyMessage(msg)}
+                      aria-label={copiedId === msg.id ? "Copied" : "Copy reply"}
+                      className="icon-btn"
+                    >
+                      {copiedId === msg.id ? <Check size={20} /> : <Copy size={20} />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleSpeak(msg)}
+                      aria-label={speakingId === msg.id ? "Stop listening" : "Listen to reply"}
+                      className="icon-btn"
+                    >
+                      {speakingId === msg.id ? <Stop size={20} /> : <Speaker size={20} />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => shareMessage(msg)}
+                      aria-label="Share reply"
+                      className="icon-btn"
+                    >
+                      <Share size={20} />
+                    </button>
+                    {msg.id === lastAssistantId && !loading && (
+                      <button type="button" onClick={regenerate} aria-label="Regenerate reply" className="icon-btn">
+                        <Refresh size={20} />
+                      </button>
                     )}
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                </div>
+              ),
+            )}
 
             {loading && (
-              <div className="flex gap-4 py-5" role="status" aria-label="Jarvis is thinking">
-                <Avatar role="assistant" />
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
-                </div>
+              <div className="flex items-center gap-1.5 py-5 text-muted" role="status" aria-label="Jarvis is writing">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
               </div>
             )}
 
-            {error && <div className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 my-3">{error}</div>}
+            {errorBox}
             <div ref={endRef} />
           </div>
 
-          <div className="sticky bottom-4 w-full max-w-3xl mx-auto pt-3">
-            {messages.some((m) => m.role === "assistant") && !loading && (
-              <button
-                onClick={regenerate}
-                className="mb-2 ml-2 text-xs rounded-md px-2 py-1 text-slate-500 bg-[#f7f7f8] hover:bg-slate-200/60"
-              >
-                ↻ Regenerate
-              </button>
-            )}
-            {composer}
+          <div className="sticky bottom-0 bg-page composer-wrap">
+            <div className="w-full max-w-[720px] mx-auto px-4 pt-2 pb-3">{composer}</div>
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-function Avatar({ role }: { role: Role }) {
-  return role === "assistant" ? (
-    <div className="h-8 w-8 shrink-0 rounded-full bg-slate-900 text-white text-sm font-semibold font-display inline-flex items-center justify-center">
-      J
-    </div>
-  ) : (
-    <div className="h-8 w-8 shrink-0 rounded-full bg-slate-200 text-slate-600 inline-flex items-center justify-center">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21a8 8 0 0 1 16 0z" />
-      </svg>
     </div>
   );
 }
