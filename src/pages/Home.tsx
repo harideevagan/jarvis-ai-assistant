@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <div>
       <div className="max-w-5xl mx-auto">
-        <h1 className="sr-only">Jarvis, Hari's assistant</h1>
+        <h1 className="sr-only">JARVIS AI: Personal AI Assistant and AI Chatbot by Harideevagan</h1>
         <ChatWidget />
       </div>
 

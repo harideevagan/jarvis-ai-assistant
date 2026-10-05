@@ -1,0 +1,19 @@
+# JARVIS AI
+
+> JARVIS AI is a personal AI assistant and AI chatbot built by Hari Deevagan (Harideevagan M), an AI Engineer and Odoo ERP Architect in Chennai, India. Visitors chat with it by text or voice to learn about Harideevagan's AI, Odoo and automation work.
+
+## What it does
+- Answers questions about Harideevagan's services, projects and skills.
+- Replies in a language the visitor chooses (for example English, Tamil, Hindi).
+- Supports voice input and read-aloud replies in browsers that support them.
+
+## Links
+- [JARVIS AI](https://jarvis.harideevagan.netlify.app/): the assistant
+- [Hari Deevagan portfolio](https://harideevagan.netlify.app/): about the builder
+- [Chess game](https://chess-harideevagan.netlify.app/)
+- [AI guide](https://ai-harideevagan.netlify.app/)
+- [Odoo guide](https://odoo-harideevagan.netlify.app/)
+- [JavaScript guide](https://js-harideevagan.netlify.app/)
+- [Python guide](https://python-harideevagan.netlify.app/)
+- [HTML and CSS guide](https://html-css-harideevagan.netlify.app/)
+- [PostgreSQL and SQL guide](https://psql-sql-harideevagan.netlify.app/)

@@ -2,6 +2,17 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { contact } from "../data/contact";
 
+const builderLinks = [
+  { href: "https://harideevagan.netlify.app/", label: "Portfolio" },
+  { href: "https://chess-harideevagan.netlify.app/", label: "Chess game" },
+  { href: "https://js-harideevagan.netlify.app/", label: "JavaScript guide" },
+  { href: "https://python-harideevagan.netlify.app/", label: "Python guide" },
+  { href: "https://html-css-harideevagan.netlify.app/", label: "HTML and CSS guide" },
+  { href: "https://psql-sql-harideevagan.netlify.app/", label: "PostgreSQL and SQL guide" },
+  { href: "https://ai-harideevagan.netlify.app/", label: "AI guide" },
+  { href: "https://odoo-harideevagan.netlify.app/", label: "Odoo guide" },
+];
+
 const footerLinks = [
   { to: "/ai", label: "AI Assistant" },
   { to: "/about", label: "About" },
@@ -28,7 +39,21 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="max-w-5xl mx-auto px-4 py-8 grid gap-6 sm:grid-cols-2">
           <div>
             <div className="font-serif font-semibold text-lg">Jarvis</div>
-            <p className="text-muted mt-1">Built by Harideevagan M</p>
+            <p className="text-muted mt-1">
+              Built by{" "}
+              <a href="https://harideevagan.netlify.app/" className="text-ink underline underline-offset-4">
+                Hari Deevagan
+              </a>
+            </p>
+            <ul className="flex flex-wrap gap-x-4 mt-2">
+              {builderLinks.map((l) => (
+                <li key={l.href}>
+                  <a href={l.href} className="inline-flex items-center min-h-[44px] text-muted hover:text-ink hover:underline underline-offset-4">
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
           <ul className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-x-2">
             {footerLinks.map((l) => (
