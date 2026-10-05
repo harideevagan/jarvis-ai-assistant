@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://harideevagan-architect.netlify.app/sitemap.xml
+Sitemap: https://jarvis.harideevagan.netlify.app/sitemap.xml

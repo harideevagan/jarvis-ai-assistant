@@ -8,7 +8,7 @@
 - Supports voice input and read-aloud replies in browsers that support them.
 
 ## Links
-- [JARVIS AI](https://harideevagan-architect.netlify.app/): the assistant
+- [JARVIS AI](https://jarvis.harideevagan.netlify.app/): the assistant
 - [Hari Deevagan portfolio](https://harideevagan.netlify.app/): about the builder
 - [Chess game](https://chess-harideevagan.netlify.app/)
 - [AI guide](https://ai-harideevagan.netlify.app/)
