@@ -1,65 +1,52 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import ChatWidget from "../components/ChatWidget";
-import Reveal from "../components/Reveal";
 import { profile } from "../data/harideevagan";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0 },
-};
+const sections = [
+  {
+    to: "/services",
+    title: "Services",
+    body: "Odoo ERP, AI and LLM systems, automation, and full-stack development.",
+    cta: "See services",
+  },
+  {
+    to: "/projects",
+    title: "Projects",
+    body: "Enterprise ERP suites, AI assistants, and cross-platform agents.",
+    cta: "See projects",
+  },
+  {
+    to: "/contact",
+    title: "Contact",
+    body: `Have a project in mind? Write to ${profile.name}.`,
+    cta: "Get in touch",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-16 sm:py-20">
-      <section className="text-center max-w-3xl mx-auto mb-14">
-        <motion.div initial="hidden" animate="show" transition={{ staggerChildren: 0.12 }}>
-          <motion.h1
-            variants={fadeUp}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.1] text-slate-900"
-          >
-            Ask Jarvis Anything
-          </motion.h1>
-          <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="mt-6 text-lg text-slate-600"
-          >
-            An AI assistant for {profile.name}'s technology, projects, services, and live web research.
-          </motion.p>
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="mt-7 flex flex-wrap justify-center gap-2"
-          >
-            {profile.titles.map((t) => (
-              <span key={t} className="chip text-slate-600">
-                {t}
-              </span>
-            ))}
-          </motion.div>
-        </motion.div>
-      </section>
-
-      <Reveal>
+    <div>
+      <div className="max-w-5xl mx-auto">
+        <h1 className="sr-only">Jarvis, Hari's assistant</h1>
         <ChatWidget />
-      </Reveal>
+      </div>
 
-      <section className="mt-20 grid gap-6 sm:grid-cols-3 text-center">
-        {[
-          { to: "/services", title: "Services", body: "Odoo ERP, AI/LLM systems, automation, and full-stack development." },
-          { to: "/projects", title: "Projects", body: "Enterprise ERP suites, AI assistants, and cross-platform agents." },
-          { to: "/contact", title: "Contact", body: `Ready to start a project? Get in touch with ${profile.name}.` },
-        ].map((c, i) => (
-          <Reveal key={c.to} delay={i * 0.1}>
-            <Link to={c.to} className="card-lift block p-6 h-full">
-              <div className="text-xl font-semibold font-display">{c.title}</div>
-              <p className="text-sm text-slate-500 mt-2">{c.body}</p>
-            </Link>
-          </Reveal>
-        ))}
-      </section>
+      <div className="max-w-5xl mx-auto px-4 mt-16">
+        <p className="text-muted measure">{profile.titles.join(", ")}.</p>
+        <div className="mt-6 border-t border-line">
+          {sections.map((s) => (
+            <section key={s.to} className="py-6 border-b border-line sm:grid sm:grid-cols-[1fr_2fr] sm:gap-8">
+              <h2 className="section-title">{s.title}</h2>
+              <div className="mt-2 sm:mt-0">
+                <p className="measure">{s.body}</p>
+                <Link to={s.to} className="link inline-flex items-center min-h-[44px]">
+                  {s.cta}
+                </Link>
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

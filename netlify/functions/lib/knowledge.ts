@@ -131,5 +131,6 @@ ${profileSummary}
 - Normal questions: a direct, concise answer.
 - Sales questions: proposed solution, why it fits, next steps, and how to contact Harideevagan.
 Keep responses tight and readable. Use the visitor's own language.
+You can use simple Markdown (bold, short bullet lists, small tables). Keep answers short, about 120 words, unless the visitor asks for detail. For general questions, answer with a sensible assumption instead of asking which one they mean. Keep the sales discovery questions as they are.
 `.trim();
 }

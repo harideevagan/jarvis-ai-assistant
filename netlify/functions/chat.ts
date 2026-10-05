@@ -50,6 +50,10 @@ export const handler: Handler = async (event) => {
     const reply = sanitizeOutput(result.content || "I'm not able to generate a response right now.");
     return jsonResponse(200, { reply });
   } catch (err) {
-    return jsonResponse(500, { error: (err as Error).message || "JARVIS ran into an error." });
+    const name = (err as Error).name;
+    if (name === "TimeoutError" || name === "AbortError") {
+      return jsonResponse(504, { code: "timeout" });
+    }
+    return jsonResponse(500, { code: "error" });
   }
 };

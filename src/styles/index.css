@@ -2,119 +2,257 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --vvh: 100dvh;
+}
+
 html {
-  scroll-behavior: smooth;
   color-scheme: light;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  @apply text-slate-900 font-sans;
-  background: #f7f7f8;
+  @apply bg-page text-ink font-sans;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  overflow-x: hidden;
 }
 
 h1,
 h2,
 h3 {
-  @apply font-display;
+  @apply font-serif font-semibold text-ink;
+  line-height: 1.25;
+  overflow-wrap: break-word;
 }
 
-/* ---------- Cards ---------- */
-.card-lift {
-  @apply rounded-2xl bg-white border border-slate-200;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+a {
+  overflow-wrap: anywhere;
 }
-.card-lift:hover {
-  transform: translateY(-3px);
-  border-color: #cbd5e1;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+:focus-visible {
+  outline: 2px solid #2f3e9e;
+  outline-offset: 2px;
 }
-.chip {
-  @apply text-xs rounded-full px-3 py-1 bg-white border border-slate-200 text-slate-600;
+
+input,
+textarea,
+select {
+  font-size: 1rem;
 }
 
 /* ---------- Typography ---------- */
 .page-title {
-  @apply text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-slate-900;
+  @apply font-serif font-semibold text-3xl sm:text-4xl mb-5;
 }
 .section-title {
-  @apply text-2xl sm:text-3xl font-semibold tracking-tight mt-12 mb-4;
+  @apply font-serif font-semibold text-xl sm:text-2xl;
+}
+.measure {
+  max-width: 68ch;
+}
+.link {
+  @apply text-indigo underline underline-offset-4 decoration-1;
+}
+.link:hover {
+  text-decoration-thickness: 2px;
 }
 
 /* ---------- Buttons ---------- */
+.btn-primary,
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-ui px-5 min-h-[44px] text-base font-medium;
+}
 .btn-primary {
-  @apply rounded-xl bg-slate-900 text-white px-5 py-2.5 text-sm font-medium;
-  transition: background-color 0.2s ease;
+  @apply bg-indigo text-white;
 }
 .btn-primary:hover:not(:disabled) {
-  @apply bg-slate-700;
+  background: #263380;
 }
 .btn-ghost {
-  @apply rounded-xl bg-white border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-800;
-  transition: background-color 0.2s ease;
+  @apply bg-transparent border border-line text-ink;
+  border-color: #cfd5de;
 }
 .btn-ghost:hover {
-  @apply bg-slate-100;
+  @apply bg-white;
 }
 
-/* ---------- Chat helpers ---------- */
-.mic-listening {
-  animation: mic-pulse 1.2s ease-in-out infinite;
-  @apply text-red-500 bg-red-50;
+.field {
+  @apply w-full rounded-ui border bg-white px-3 py-2 min-h-[44px] text-base text-ink;
+  border-color: #cfd5de;
 }
-@keyframes mic-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+.field:focus {
+  outline: 2px solid #2f3e9e;
+  outline-offset: 1px;
+  border-color: #2f3e9e;
+}
+
+/* ---------- Chat ---------- */
+.icon-btn {
+  @apply inline-flex items-center justify-center h-11 w-11 shrink-0 rounded-ui text-muted;
+}
+.icon-btn:hover {
+  @apply bg-bubble text-ink;
+}
+
+.msg-in {
+  animation: msg-in 0.25s ease-out;
+}
+@keyframes msg-in {
+  from {
+    opacity: 0;
   }
-  50% {
-    box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+  to {
+    opacity: 1;
   }
 }
+
+.reply-actions {
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .reply-actions {
+    opacity: 0;
+  }
+  .reply:hover .reply-actions,
+  .reply:focus-within .reply-actions {
+    opacity: 1;
+  }
+}
+
 .typing-dot {
   display: inline-block;
   width: 6px;
   height: 6px;
   border-radius: 9999px;
   background: currentColor;
-  animation: dot-bounce 1.1s ease-in-out infinite;
+  animation: dot-fade 1.2s ease-in-out infinite;
 }
 .typing-dot:nth-child(2) {
-  animation-delay: 0.15s;
+  animation-delay: 0.2s;
 }
 .typing-dot:nth-child(3) {
-  animation-delay: 0.3s;
+  animation-delay: 0.4s;
 }
-@keyframes dot-bounce {
+@keyframes dot-fade {
   0%,
-  60%,
+  80%,
   100% {
-    transform: translateY(0);
-    opacity: 0.4;
+    opacity: 0.25;
   }
-  30% {
-    transform: translateY(-5px);
+  40% {
     opacity: 1;
   }
 }
 
-.prose-chat p {
-  margin: 0 0 0.5rem 0;
-}
-.prose-chat p:last-child {
-  margin-bottom: 0;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.5);
-  border-radius: 9999px;
+.composer-wrap {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mic-listening,
+  .msg-in,
   .typing-dot {
     animation: none;
   }
+  .typing-dot {
+    opacity: 0.6;
+  }
+}
+
+/* ---------- Markdown in replies ---------- */
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md p,
+.md ul,
+.md ol,
+.md pre,
+.md .md-table {
+  margin: 0 0 0.75rem 0;
+}
+.md ul,
+.md ol {
+  padding-left: 1.4rem;
+}
+.md ul {
+  list-style: disc;
+}
+.md ol {
+  list-style: decimal;
+}
+.md li {
+  margin: 0.15rem 0;
+}
+.md li > p {
+  margin: 0;
+}
+.md strong {
+  font-weight: 600;
+}
+.md h1,
+.md h2,
+.md h3,
+.md h4 {
+  font-family: "Source Serif 4", "Noto Sans Tamil", "Noto Sans Devanagari", Georgia, serif;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1rem 0 0.4rem 0;
+}
+.md h1 {
+  font-size: 1.25rem;
+}
+.md h2 {
+  font-size: 1.15rem;
+}
+.md h3,
+.md h4 {
+  font-size: 1.05rem;
+}
+.md a {
+  color: #2f3e9e;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.md code {
+  background: #eef0f5;
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+.md pre {
+  background: #eef0f5;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+.md pre code {
+  background: none;
+  padding: 0;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.md .md-table {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.md table {
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.md th,
+.md td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid #e3e7ed;
+  overflow-wrap: normal;
+  vertical-align: top;
+}
+.md th {
+  font-weight: 600;
+  border-bottom: 2px solid #c5ccd6;
 }

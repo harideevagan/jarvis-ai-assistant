@@ -2,8 +2,8 @@
 
 A production-ready website + AI assistant built with React, Vite, TypeScript and Netlify
 Functions. JARVIS answers questions about Harideevagan's work, acts as a friendly sales
-assistant when a visitor shows interest, and can search the live web when needed —
-all without ever revealing the underlying AI model or provider.
+assistant when a visitor shows interest, all without ever revealing the underlying AI model
+or provider. The UI is light only, replies are rendered as Markdown, and all icons are inline SVG.
 
 ## 1. Install
 
@@ -16,9 +16,10 @@ npm install
 Copy `.env.example` to `.env` and fill in:
 
 - `NVIDIA_API_KEY` — key for your LLM backend (OpenAI-compatible chat completions API).
-- `SEARCH_API_KEY` — key for the web search provider (Tavily by default).
+- `LLM_MODEL` — optional. The default model is `openai/gpt-oss-20b`.
+- `LLM_API_URL` — optional. Defaults to the NVIDIA endpoint.
 
-**Never commit `.env` or put these keys in frontend code.** In production, set the same
+**Never commit `.env` or put the key in frontend code.** In production, set the same
 variables in Netlify: Site settings → Environment variables.
 
 ## 3. Run locally
@@ -28,8 +29,7 @@ npm install -g netlify-cli   # once
 netlify dev
 ```
 
-This runs the Vite dev server and the Netlify Functions together (`chat`, `search`,
-`fetch-page`) so the chat widget works end to end.
+This runs the Vite dev server and the Netlify Functions together (`chat`) so the chat widget works end to end.
 
 ## 4. Build & deploy
 
@@ -49,13 +49,11 @@ Netlify reads `netlify.toml` automatically (build command, functions folder, red
 
 | What | Where |
 |---|---|
-| Assistant's identity, personality, tools | `netlify/functions/lib/knowledge.ts` |
+| Assistant's identity and personality | `netlify/functions/lib/knowledge.ts` |
 | **Sales / discount strategy** | `src/data/salesPolicy.ts` (frontend reference) and mirrored in `netlify/functions/lib/knowledge.ts` under "Competitor price-matching strategy" |
 | Profile / projects / services / skills | `src/data/*.ts` |
 | LLM API call | `netlify/functions/lib/modelClient.ts` |
-| Web search | `netlify/functions/lib/searchClient.ts` |
-| Page fetch + text extraction | `netlify/functions/lib/fetchPage.ts` |
-| Chat orchestration (tool-calling loop) | `netlify/functions/chat.ts` |
+| Chat endpoint (one model call per message) | `netlify/functions/chat.ts` |
 | Lead capture form | `src/pages/Contact.tsx` (submits via Netlify Forms — leads appear in Netlify's Forms dashboard) |
 
 ### Adjusting the sales / discount policy
@@ -76,7 +74,7 @@ else needs to change.
 ## Security notes
 
 - All API keys stay server-side in Netlify Functions; the browser only ever talks to
-  `/api/chat`, `/api/search`, `/api/fetch-page`.
+  `/api/chat`.
 - Basic per-IP rate limiting and input-size limits are built in
   (`netlify/functions/lib/security.ts`). For real production traffic, also add
   Netlify's own rate limiting or a WAF in front.
@@ -88,11 +86,10 @@ else needs to change.
 ## Features included
 
 - Multi-page site (Home, About, Services, Projects, Skills, Contact, AI, Blog)
-- Chat widget: voice input (Web Speech API), text-to-speech, copy/regenerate/share/clear,
-  language selector, dark/light mode
+- Chat widget: voice input (Web Speech API), text-to-speech, copy/regenerate/share/new chat,
+  language selector, Markdown replies, SVG icons, light theme only
 - Automatic language detection & reply-in-kind (11 Indian + English languages) via the
   system prompt
-- Live web search with a visible "Web research used" sources section
 - Lead capture form wired to Netlify Forms
 - SEO: meta tags, Open Graph/Twitter cards, canonical URL, JSON-LD (Person, WebSite,
   SoftwareApplication), `sitemap.xml`, `robots.txt`

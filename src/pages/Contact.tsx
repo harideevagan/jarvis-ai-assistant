@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { contact } from "../data/contact";
-import Reveal from "../components/Reveal";
+import { Link, Linkedin, Mail, Phone } from "../components/Icons";
 
 const initialForm = {
   name: "",
@@ -45,56 +45,37 @@ export default function Contact() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16">
-      <Reveal>
-      <h1 className="page-title">
-        Contact Harideevagan
-      </h1>
-      <p className="text-lg text-slate-600 mb-8">
+    <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16">
+      <h1 className="page-title">Contact Harideevagan</h1>
+      <p className="measure text-lg mb-8">
         Share a few details about your project, or reach out directly.
       </p>
-      </Reveal>
 
-      <Reveal delay={0.1}>
-      <div className="flex flex-wrap gap-3 mb-10">
-        <a
-          href={`mailto:${contact.email}`}
-          className="btn-primary"
-        >
-          ✉️ Email Hari
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-12">
+        <a href={`mailto:${contact.email}`} className="btn-primary">
+          <Mail size={20} />
+          Email Hari
         </a>
-        <a
-          href={contact.phoneHref}
-          className="btn-ghost"
-        >
-          📞 Call Hari
+        <a href={contact.phoneHref} className="btn-ghost">
+          <Phone size={20} />
+          Call Hari
         </a>
-        <a
-          href={contact.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-ghost"
-        >
-          🌐 Visit Website
+        <a href={contact.website} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+          <Link size={20} />
+          Visit website
         </a>
-        <a
-          href={contact.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-ghost"
-        >
-          in LinkedIn
+        <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+          <Linkedin size={20} />
+          LinkedIn
         </a>
       </div>
-      </Reveal>
 
-      <Reveal delay={0.15}>
       {status === "sent" ? (
-        <div className="rounded-xl border border-green-300 bg-green-50 p-6 text-sm">
-          Thanks — your details have been sent. Harideevagan will follow up with you personally.
-        </div>
+        <p role="status" className="measure border-l-2 border-indigo pl-4">
+          Your details are sent. Hari will reply to you personally.
+        </p>
       ) : (
-        <form onSubmit={handleSubmit} className="card-lift hover:!translate-y-0 p-6 grid gap-4 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="border-t border-line pt-8 grid gap-5 sm:grid-cols-2">
           <Field label="Name" value={form.name} onChange={(v) => update("name", v)} required />
           <Field label="Company" value={form.company} onChange={(v) => update("company", v)} />
           <Field label="Email" type="email" value={form.email} onChange={(v) => update("email", v)} required />
@@ -104,29 +85,29 @@ export default function Contact() {
           <Field label="Expected timeline" value={form.timeline} onChange={(v) => update("timeline", v)} />
           <Field label="Approximate budget" value={form.budget} onChange={(v) => update("budget", v)} />
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium mb-1">Project description</label>
+            <label className="block font-medium mb-1" htmlFor="f-description">
+              Project description
+            </label>
             <textarea
+              id="f-description"
               value={form.description}
               onChange={(e) => update("description", e.target.value)}
-              rows={4}
-              className="w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+              rows={5}
+              className="field"
             />
           </div>
-          <div className="sm:col-span-2 flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={status === "sending"}
-              className="btn-primary disabled:opacity-50"
-            >
-              {status === "sending" ? "Sending…" : "Send"}
+          <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3">
+            <button type="submit" disabled={status === "sending"} className="btn-primary disabled:opacity-50">
+              {status === "sending" ? "Sending" : "Send"}
             </button>
             {status === "error" && (
-              <span className="text-sm text-red-500">Something went wrong — please email directly instead.</span>
+              <span role="alert" className="measure">
+                The form did not send. Please email Hari directly.
+              </span>
             )}
           </div>
         </form>
       )}
-      </Reveal>
     </div>
   );
 }
@@ -144,15 +125,19 @@ function Field({
   type?: string;
   required?: boolean;
 }) {
+  const id = `f-${label.toLowerCase().replace(/\s+/g, "-")}`;
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">{label}</label>
+      <label className="block font-medium mb-1" htmlFor={id}>
+        {label}
+      </label>
       <input
+        id={id}
         type={type}
         value={value}
         required={required}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+        className="field"
       />
     </div>
   );
